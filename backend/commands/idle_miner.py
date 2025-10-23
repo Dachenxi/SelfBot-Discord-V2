@@ -10,6 +10,7 @@ from discord.ext import commands, tasks
 class IdleMiner(commands.Cog):
     def __init__(self, bot: backend.bot.Bot):
         self.bot = bot
+        self.upgrade_cycler = itertools.cycle(["pickaxe", "backpack"])
         self.dict_command: dict[str, discord.SlashCommand | None] = {
             "sell" : None,
             "upgrade" : None,
@@ -20,7 +21,7 @@ class IdleMiner(commands.Cog):
     @tasks.loop(seconds=1)
     async def auto_play(self, channel: discord.TextChannel):
         try:
-            upgrade_type = next(itertools.cycle(["pickaxe", "backpack"]))
+            upgrade_type = next(self.upgrade_cycler)
             await self.dict_command["sell"].__call__(channel)
             backpack_interaction = await self.dict_command["upgrade"].__call__(channel, item=upgrade_type, amount="all")
             backpack_message = await channel.fetch_message(backpack_interaction.message.id)
