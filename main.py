@@ -21,10 +21,11 @@ bot = Bot(
             "large_image": "1429834224516595712",
             "large_text": "Discord V2",
         },
-        type = discord.ActivityType.playing,
+        type = discord.ActivityType.streaming,
         state = "By DaChenxi",
         details = "In Development",
-    )
+    ),
+    status=discord.Status.online,
 )
 
 async def main():
