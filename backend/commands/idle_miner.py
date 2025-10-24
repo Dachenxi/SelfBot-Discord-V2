@@ -160,8 +160,10 @@ class IdleMiner(commands.Cog):
         if message.guild is None and message.author.id == 518759221098053634:
             self.auto_play.cancel()
             self.auto_job.cancel()
+            self.auto_farm.cancel()
             await self.bot.update_task_status(task_type="Auto Play", task_name="Idle Miner", task_status="Not Running")
             await self.bot.update_task_status(task_type="Auto Job", task_name="Idle Miner", task_status="Not Running")
+            await self.bot.update_task_status(task_type="Auto Farm", task_name="Idle Miner", task_status="Not Running")
 
 
 
