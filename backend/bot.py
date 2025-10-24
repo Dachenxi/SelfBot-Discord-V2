@@ -97,7 +97,9 @@ class Bot(commands.Bot):
                              f"{self.command_prefix}idleminerautoplay | imap\n"
                              f"-# Memulai Otomatisasi Idle Miner\n"
                              f"{self.command_prefix}idleminerautojob | imaj\n"
-                             f"-# Memulai dan menghentikan Otomatisasi Job (hunt/fish) Idle Miner"
+                             f"-# Memulai dan menghentikan Otomatisasi Job (hunt/fish) Idle Miner\n"
+                             f"{self.command_prefix}idleminerautofarm | imaf <crops>\n"
+                             f"-# Memulai dan menghentikan otomatisasi farm"
                 },
                 {
                     "name": "⚙️ **Job Status**",
@@ -151,10 +153,10 @@ class Bot(commands.Bot):
         if self.embed_message:
             try:
                 await self.embed_message.delete()
+                logging.info("Embed Message Deleted.")
             except Exception as e:
                 logging.error(f"Error deleting message embed: {e}")
 
-        logging.info("Embed Message Deleted.")
         await self.database.close()
         logging.info("Database connection closed.")
         await self.close()

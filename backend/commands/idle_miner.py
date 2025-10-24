@@ -18,6 +18,8 @@ class IdleMiner(commands.Cog):
             "prestige" : None,
             "hunt": None,
             "fish": None,
+            "plant": None,
+            "farm": None,
         }
 
     @tasks.loop(seconds=1)
@@ -64,6 +66,33 @@ class IdleMiner(commands.Cog):
         except Exception as e:
             logging.error(f"Error in auto_job task: {e}")
 
+    @tasks.loop(seconds=1)
+    async def auto_farm(self, channel: discord.TextChannel, plant: str = "Carrot"):
+        try:
+            await self.dict_command["plant"].__call__(channel, area="all", crop=plant)
+            await asyncio.sleep(random.randint(1, 3))
+            farm_interaction = await self.dict_command["farm"].__call__(channel)
+            farm_message = await channel.fetch_message(farm_interaction.message.id)
+
+            total_seconds = 0
+            for embed in farm_message.embeds:
+                time_pattern = r"crop ready in (?:(\d+)h)?\s?(?:(\d+)m)?\s?(?:(\d+)s)?"
+                time_search = re.search(time_pattern, embed.description)
+
+                if time_search:
+                    hours, minutes, seconds = time_search.groups()
+
+                    if hours:
+                        total_seconds += int(hours) * 3600
+                    if minutes:
+                        total_seconds += int(minutes) * 60
+                    if seconds:
+                        total_seconds += int(seconds)
+
+            await asyncio.sleep(total_seconds + random.randint(5, 15))
+        except Exception as e:
+            logging.error(f"Error in auto_far task: {e}")
+
     async def get_command(self, channel: discord.TextChannel):
         if all(cmd is None for cmd in self.dict_command.values()):
             list_slashcommand = await channel.application_commands()
@@ -80,6 +109,10 @@ class IdleMiner(commands.Cog):
                     self.dict_command["hunt"] = slash
                 elif slash.id == 958125967061184593:
                     self.dict_command["fish"] = slash
+                elif slash.id == 968186271971287110:
+                    self.dict_command["plant"] = slash
+                elif slash.id == 968186270197121044:
+                    self.dict_command["farm"] = slash
                 if all(cmd is not None for cmd in self.dict_command.values()):
                     break
 
@@ -108,6 +141,19 @@ class IdleMiner(commands.Cog):
         self.auto_job.start(ctx.channel)
         await ctx.send("Idle Miner Auto Jon started.")
         await self.bot.update_task_status(task_type="Auto Job", task_name="Idle Miner", task_status="Running")
+
+    @commands.command(name="idleminerautofarm", aliases=["imaf"])
+    async def idle_miner_auto_farm(self, ctx: commands.Context, crops:str):
+        await self.get_command(ctx.channel)
+        if self.auto_farm.is_running():
+            self.auto_farm.cancel()
+            await ctx.send("Idle Miner Auto Farm stopped.")
+            await self.bot.update_task_status(task_type="Auto Farm", task_name="Idle Miner", task_status="Not Running")
+            return
+
+        self.auto_farm.start(ctx.channel, crops)
+        await ctx.send("Idle Miner Auto Farm started.")
+        await self.bot.update_task_status(task_type="Auto Farm", task_name="Idle Miner", task_status="Running")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
