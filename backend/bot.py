@@ -87,17 +87,17 @@ class Bot(commands.Bot):
                     "name": "🔧 *Command*",
                     "value": f"*Utility*\n"
                              f"{self.command_prefix}reload\n"
-                             f"> Reload semuaa cog/command\n"
+                             f"-# Reload semuaa cog/command\n"
                              f"{self.command_prefix}ping\n"
-                             f"> Cek latency bot"
+                             f"-# Cek latency bot"
                 },
                 {
                     "name": "🔧 *Command*",
                     "value": f"*Idle Miner*\n"
                              f"{self.command_prefix}idleminerautoplay | imap\n"
-                             f"> Memulai Otomatisasi Idle Miner\n"
-                             f"{self.command_prefix}ping\n"
-                             f"> Cek latency bot"
+                             f"-# Memulai Otomatisasi Idle Miner\n"
+                             f"{self.command_prefix}idleminerautojob | imaj\n"
+                             f"-# Memulai dan menghentikan Otomatisasi Job (hunt/fish) Idle Miner"
                 },
                 {
                     "name": "⚙️ **Job Status**",
