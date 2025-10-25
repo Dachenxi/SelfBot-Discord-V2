@@ -20,6 +20,7 @@ class IdleMiner(commands.Cog):
             "fish": None,
             "plant": None,
             "farm": None,
+            "harvest": None,
         }
 
     @tasks.loop(seconds=1)
@@ -28,7 +29,7 @@ class IdleMiner(commands.Cog):
             upgrade_type = next(self.upgrade_cycler)
             for i in range(random.randint(1, 10)):
                 await self.dict_command["sell"].__call__(channel)
-                await  asyncio.sleep(random.randint(3, 6))
+                await  asyncio.sleep(random.randint(3, 5))
             backpack_interaction = await self.dict_command["upgrade"].__call__(channel, item=upgrade_type, amount="all")
             backpack_message = await channel.fetch_message(backpack_interaction.message.id)
             time = re.search(r"BP:(?:(\d+)m)?(?:(\d+)s)?", backpack_message.content)
@@ -69,6 +70,8 @@ class IdleMiner(commands.Cog):
     @tasks.loop(seconds=1)
     async def auto_farm(self, channel: discord.TextChannel, plant: str = "Carrot"):
         try:
+            await self.dict_command["harvest"].__call__(channel)
+            await asyncio.sleep(random.randint(1, 3))
             await self.dict_command["plant"].__call__(channel, area="all", crop=plant)
             await asyncio.sleep(random.randint(1, 3))
             farm_interaction = await self.dict_command["farm"].__call__(channel)
@@ -113,6 +116,8 @@ class IdleMiner(commands.Cog):
                     self.dict_command["plant"] = slash
                 elif slash.id == 968186270197121044:
                     self.dict_command["farm"] = slash
+                elif slash.id == 968186273284096030:
+                    self.dict_command["harvest"] = slash
                 if all(cmd is not None for cmd in self.dict_command.values()):
                     break
 
@@ -164,7 +169,6 @@ class IdleMiner(commands.Cog):
             await self.bot.update_task_status(task_type="Auto Play", task_name="Idle Miner", task_status="Not Running")
             await self.bot.update_task_status(task_type="Auto Job", task_name="Idle Miner", task_status="Not Running")
             await self.bot.update_task_status(task_type="Auto Farm", task_name="Idle Miner", task_status="Not Running")
-
 
 
 
