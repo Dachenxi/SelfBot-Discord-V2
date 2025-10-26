@@ -56,8 +56,6 @@ class Bot(commands.Bot):
     async def setup_hook(self):
         logging.info("Starting up the bot...")
         logging.info("Get Owner Object...")
-        self.owner = self.get_user(669886098906021918)
-        print(self.owner)
         logging.info("Loading cog...")
         await self.load_cog()
         logging.info("All Cog loaded.")
@@ -93,7 +91,6 @@ class Bot(commands.Bot):
                              f"🤖 Bot Version : 2.0\n"
                              f"📚 Library     : discord.py v2.6.0\n"
                              f"🗄️ Database    : SQLite\n"
-                             f"🧑‍💼 Owner       : {self.owner.display_name}"
                              f"```"
                 },
                 {

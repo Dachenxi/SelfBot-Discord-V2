@@ -173,7 +173,7 @@ class IdleMiner(commands.Cog):
                 await self.bot.update_task_status(task_type="Auto Job", task_name="Idle Miner", task_status="Not Running")
                 await self.bot.update_task_status(task_type="Auto Farm", task_name="Idle Miner", task_status="Not Running")
                 await message.forward(self.bot.owner.dm_channel)
-            elif message.author.id == self.bot.owner.id and message.content.startswith(self.bot.command_prefix):
+            elif message.author.id == 669886098906021918 and message.content.startswith(self.bot.command_prefix):
                 parts = message.content[1:].split()
                 command_name = parts[0]
                 if command_name == "verifim":
