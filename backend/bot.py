@@ -56,7 +56,7 @@ class Bot(commands.Bot):
     async def setup_hook(self):
         logging.info("Starting up the bot...")
         logging.info("Get Owner Object...")
-        self.owner = await self.get_user(669886098906021918)
+        self.owner = self.get_user(669886098906021918)
         logging.info(f"Owner Object fetched: {self.owner} (ID: {self.owner.id})")
         logging.info("Loading cog...")
         await self.load_cog()
