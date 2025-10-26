@@ -57,6 +57,7 @@ class Bot(commands.Bot):
         logging.info("Starting up the bot...")
         logging.info("Get Owner Object...")
         self.owner = self.get_user(669886098906021918)
+        print(self.owner)
         logging.info("Loading cog...")
         await self.load_cog()
         logging.info("All Cog loaded.")
