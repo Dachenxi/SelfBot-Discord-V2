@@ -28,6 +28,8 @@ class IdleMiner(commands.Cog):
         try:
             upgrade_type = next(self.upgrade_cycler)
             for i in range(random.randint(1, 10)):
+                if self.auto_play.is_being_cancelled():
+                    return
                 await self.dict_command["sell"].__call__(channel)
                 await  asyncio.sleep(random.randint(3, 5))
             backpack_interaction = await self.dict_command["upgrade"].__call__(channel, item=upgrade_type, amount="all")
@@ -162,14 +164,25 @@ class IdleMiner(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.guild is None and message.author.id == 518759221098053634:
-            self.auto_play.cancel()
-            self.auto_job.cancel()
-            self.auto_farm.cancel()
-            await self.bot.update_task_status(task_type="Auto Play", task_name="Idle Miner", task_status="Not Running")
-            await self.bot.update_task_status(task_type="Auto Job", task_name="Idle Miner", task_status="Not Running")
-            await self.bot.update_task_status(task_type="Auto Farm", task_name="Idle Miner", task_status="Not Running")
-
+        if message.guild is None:
+            if message.author.id == 518759221098053634 and "code" in message.content.lower():
+                self.auto_play.cancel()
+                self.auto_job.cancel()
+                self.auto_farm.cancel()
+                await self.bot.update_task_status(task_type="Auto Play", task_name="Idle Miner", task_status="Not Running")
+                await self.bot.update_task_status(task_type="Auto Job", task_name="Idle Miner", task_status="Not Running")
+                await self.bot.update_task_status(task_type="Auto Farm", task_name="Idle Miner", task_status="Not Running")
+                await message.forward(self.bot.owner.dm_channel)
+            elif message.author.id == self.bot.owner.id and message.content.startswith(self.bot.command_prefix):
+                parts = message.content[1:].split()
+                command_name = parts[0]
+                if command_name == "verifim":
+                    code = parts[1] if len(parts) > 1 else ""
+                    await message.reply("Verification command sent. idle miner task will resume.")
+                    idle_miner_bot = self.bot.get_user(518759221098053634)
+                    await idle_miner_bot.send(code)
+                else:
+                    return
 
 
 async def setup(bot: backend.bot.Bot):

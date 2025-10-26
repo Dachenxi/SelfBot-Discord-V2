@@ -14,6 +14,7 @@ class Bot(commands.Bot):
         self.embed_dict = {}
         self.cog_list = ["utility", "idle_miner"]
         self.embed_message = None
+        self.owner: discord.User | None = None
 
     async def parse_msg(self, message: discord.Message):
         if (
@@ -54,6 +55,9 @@ class Bot(commands.Bot):
 
     async def setup_hook(self):
         logging.info("Starting up the bot...")
+        logging.info("Get Owner Object...")
+        self.owner = await self.fetch_user(669886098906021918)
+        logging.info(f"Owner Object fetched: {self.owner} (ID: {self.owner.id})")
         logging.info("Loading cog...")
         await self.load_cog()
         logging.info("All Cog loaded.")
@@ -81,7 +85,16 @@ class Bot(commands.Bot):
                              f"🌍 Global Name   : {self.user.global_name}\n"
                              f"👤 User ID       : {self.user.id}\n"
                              f"💵 Premium       : {"Tidak Berlangganan Nitro" if not self.user.premium else "Berlangganan Nitro"}\n"
-                             f"💲 Premium Type  : {"" if self.user.premium_type.name == "none" else self.user.premium_type.name}```"
+                             f"💲 Premium Type  : {"" if self.user.premium_type.name == "none" else self.user.premium_type.name}```",
+                },
+                {
+                    "name": "📊 *Bot Status* 🟢",
+                    "value": f"```"
+                             f"🤖 Bot Version : 2.0\n"
+                             f"📚 Library     : discord.py v2.6.0\n"
+                             f"🗄️ Database    : SQLite\n"
+                             f"🧑‍💼 Owner       : {self.owner.display_name}"
+                             f"```"
                 },
                 {
                     "name": "🔧 *Command*",
@@ -98,7 +111,7 @@ class Bot(commands.Bot):
                              f"-# Memulai Otomatisasi Idle Miner\n"
                              f"{self.command_prefix}idleminerautojob | imaj\n"
                              f"-# Memulai dan menghentikan Otomatisasi Job (hunt/fish) Idle Miner\n"
-                             f"{self.command_prefix}idleminerautofarm | imaf <crops>\n"
+                             f"{self.command_prefix}idleminerautofarm <crops> | imaf <crops>\n"
                              f"-# Memulai dan menghentikan otomatisasi farm"
                 },
                 {

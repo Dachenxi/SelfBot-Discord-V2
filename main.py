@@ -22,8 +22,8 @@ bot = Bot(
             "large_text": "Discord V2",
         },
         type = discord.ActivityType.streaming,
-        state = "By DaChenxi",
-        details = "In Development",
+        state = "In Development | Released",
+        details = "By DaChenxi",
     ),
     status=discord.Status.online,
 )
