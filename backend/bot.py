@@ -169,6 +169,7 @@ class Bot(commands.Bot):
 
         await self.database.close()
         logging.info("Database connection closed.")
+        await self.change_presence(status=discord.Status.offline)
         await self.close()
         logging.warning("Bot has been closed.")
 

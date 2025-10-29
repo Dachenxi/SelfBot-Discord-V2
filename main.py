@@ -14,17 +14,6 @@ bot = Bot(
     self_bot = True,
     db_path='database/bot.db',
     webhook_url=os.getenv("WEBHOOK_URL"),
-    activity = discord.Activity(
-        application_id = 688591619217293401,
-        name = "Discord V2",
-        assets = {
-            "large_image": "1429834224516595712",
-            "large_text": "Discord V2",
-        },
-        type = discord.ActivityType.streaming,
-        state = "In Development | Released",
-        details = "By DaChenxi",
-    ),
     status=discord.Status.online,
 )
 
