@@ -10,9 +10,8 @@ class Bot(commands.Bot):
     def __init__(self, db_path, webhook_url, *args, **kwargs):
         commands.Bot.__init__(self, *args, **kwargs)
         self.database = Database(db_path=db_path)
-        self.bot_embed = EmbedManager(self, webhook_url)
         self.embed_dict = {}
-        self.cog_list = ["utility", "idle_miner"]
+        self.cog_list = ["utility", "idle_miner", "sniff"]
         self.embed_message = None
         self.owner: discord.User | None = None
 
@@ -60,102 +59,7 @@ class Bot(commands.Bot):
         await self.load_cog()
         logging.info("All Cog loaded.")
         logging.info("Load the embed...")
-        self.embed_dict = {
-            "author": {
-                "name": self.user.name,
-                "icon_url": self.user.display_avatar.url
-            },
-            "title": "**Discord V2 Status**",
-            "color": 3926819,
-            "description": f"Discord Bot V2.0 dibuat bertujuan untuk membantu Pengguna mengubah akun menjadi sebuah aplikasi yang bisa menjalankan pesan otomatis bahkan online 24 jam",
-            "footer": {
-                "text": "Discord Bot V2.0 | By Dachenxi",
-                "icon_url": self.user.display_avatar.url
-            },
-            "image": "https://i.ibb.co.com/V0WfzRRf/standard.gif",
-            "fields": [
-                {
-                    "name": "🕹️ *Client Status* 🟢",
-                    "value": f"```"
-                             f"🕛 Created At    : {self.user.created_at.strftime("%A %B %Y")}\n"
-                             f"⭐ Discriminator : {self.user.discriminator}\n"
-                             f"🧑‍🌾 Display Name  : {self.user.display_name}\n"
-                             f"🌍 Global Name   : {self.user.global_name}\n"
-                             f"👤 User ID       : {self.user.id}\n"
-                             f"💵 Premium       : {"Tidak Berlangganan Nitro" if not self.user.premium else "Berlangganan Nitro"}\n"
-                             f"💲 Premium Type  : {"" if self.user.premium_type.name == "none" else self.user.premium_type.name}```",
-                },
-                {
-                    "name": "📊 *Bot Status* 🟢",
-                    "value": f"```"
-                             f"🤖 Bot Version : 2.0\n"
-                             f"📚 Library     : discord.py v2.6.0\n"
-                             f"🗄️ Database    : SQLite\n"
-                             f"```"
-                },
-                {
-                    "name": "🔧 *Command*",
-                    "value": f"*Utility*\n"
-                             f"{self.command_prefix}reload\n"
-                             f"-# Reload semuaa cog/command\n"
-                             f"{self.command_prefix}ping\n"
-                             f"-# Cek latency bot"
-                },
-                {
-                    "name": "🔧 *Command*",
-                    "value": f"*Idle Miner*\n"
-                             f"{self.command_prefix}idleminerautoplay | imap\n"
-                             f"-# Memulai Otomatisasi Idle Miner\n"
-                             f"{self.command_prefix}idleminerautojob | imaj\n"
-                             f"-# Memulai dan menghentikan Otomatisasi Job (hunt/fish) Idle Miner\n"
-                             f"{self.command_prefix}idleminerautofarm <crops> | imaf <crops>\n"
-                             f"-# Memulai dan menghentikan otomatisasi farm"
-                },
-                {
-                    "name": "⚙️ **Job Status**",
-                    "value": "⛏️ **__Idle Miner__**\n"
-                             "***Auto Play*** : 🔴 Not Running\n"
-                             "***Auto Job*** : 🔴 Not Running\n"
-                             "***Auto Farm*** : 🔴 Not Running\n",
-                    "inline": True
-                },
-                {
-                    "name": "⚙️ **Job Status**",
-                    "value": "🎣 **__Virtual Fisher__**\n"
-                             "***Auto Play*** : 🔴 Not Running\n"
-                             "***Auto Upgrade*** : 🔴 Not Running",
-                    "inline": True
-                }
-
-            ]
-        }
-        self.embed_message = await self.bot_embed.create_embed(self.embed_dict)
         logging.info("Setup is done")
-
-    async def update_task_status(self,
-                                 task_type: Literal["Auto Play", "Auto Job", "Auto Farm", "Auto Upgrade"],
-                                 task_name: Literal["Idle Miner", "Virtual Fisher"],
-                                 task_status: Literal["Running", "Not Running"]):
-
-        target_field_name = "⚙️ **Job Status**"
-
-        for field in self.embed_dict["fields"]:
-            if field.get("name") == target_field_name and task_name in field.get("value", ""):
-
-                lines = field["value"].split("\n")
-                for i, line in enumerate(lines):
-                    if task_type in line:
-                        status_icon = "🟢" if task_status == "Running" else "🔴"
-                        lines[i] = f"***{task_type}*** : {status_icon} {task_status}"
-                        break
-
-                field["value"] = "\n".join(lines)
-                break
-
-        if self.embed_message:
-            await self.bot_embed.edit_embed(self.embed_message, self.embed_dict)
-            logging.info(f"Updated {task_name} - {task_type} to {task_status}")
-
 
     async def closing_bot(self):
         logging.info("Closing the bot...")

@@ -129,12 +129,10 @@ class IdleMiner(commands.Cog):
         if self.auto_play.is_running():
             self.auto_play.cancel()
             await ctx.send("Idle Miner Auto Play stopped.")
-            await self.bot.update_task_status(task_type="Auto Play", task_name="Idle Miner", task_status="Not Running")
             return
 
         self.auto_play.start(ctx.channel)
         await ctx.send("Idle Miner Auto Play started.")
-        await self.bot.update_task_status(task_type="Auto Play", task_name="Idle Miner", task_status="Running")
 
     @commands.command(name="idleminerautojob", aliases=["imaj"])
     async def idle_miner_auto_job(self, ctx: commands.Context):
@@ -142,12 +140,10 @@ class IdleMiner(commands.Cog):
         if self.auto_job.is_running():
             self.auto_job.cancel()
             await ctx.send("Idle Miner Auto Job stopped.")
-            await self.bot.update_task_status(task_type="Auto Job", task_name="Idle Miner", task_status="Not Running")
             return
 
         self.auto_job.start(ctx.channel)
         await ctx.send("Idle Miner Auto Jon started.")
-        await self.bot.update_task_status(task_type="Auto Job", task_name="Idle Miner", task_status="Running")
 
     @commands.command(name="idleminerautofarm", aliases=["imaf"])
     async def idle_miner_auto_farm(self, ctx: commands.Context, crops:str):
@@ -155,12 +151,10 @@ class IdleMiner(commands.Cog):
         if self.auto_farm.is_running():
             self.auto_farm.cancel()
             await ctx.send("Idle Miner Auto Farm stopped.")
-            await self.bot.update_task_status(task_type="Auto Farm", task_name="Idle Miner", task_status="Not Running")
             return
 
         self.auto_farm.start(ctx.channel, crops)
         await ctx.send("Idle Miner Auto Farm started.")
-        await self.bot.update_task_status(task_type="Auto Farm", task_name="Idle Miner", task_status="Running")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -169,9 +163,6 @@ class IdleMiner(commands.Cog):
                 self.auto_play.cancel()
                 self.auto_job.cancel()
                 self.auto_farm.cancel()
-                await self.bot.update_task_status(task_type="Auto Play", task_name="Idle Miner", task_status="Not Running")
-                await self.bot.update_task_status(task_type="Auto Job", task_name="Idle Miner", task_status="Not Running")
-                await self.bot.update_task_status(task_type="Auto Farm", task_name="Idle Miner", task_status="Not Running")
                 await message.forward(self.bot.owner.dm_channel)
             elif message.author.id == 669886098906021918 and message.content.startswith(self.bot.command_prefix):
                 parts = message.content[1:].split()
