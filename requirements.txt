@@ -1,4 +1,4 @@
-discord-webhook
+discord-webhook[async]
 python-dotenv
 aiosqlite
 git+https://github.com/dolfies/discord.py-self@9296b4803d80d6e584ea5ec66850318e76144484

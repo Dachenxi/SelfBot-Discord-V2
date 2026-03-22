@@ -1,8 +1,6 @@
 import backend
 import discord
 import re
-import random
-import asyncio
 import logging
 import os
 from discord_webhook import AsyncDiscordWebhook, DiscordEmbed
@@ -41,7 +39,7 @@ class Sniff(commands.Cog):
         await webhook.execute()
 
     @staticmethod
-    async def send_embed(message: discord.Message, url: str):
+    async def send_embed(message: discord.Message, url: str, tipe: str = "chat"):
         webhook = AsyncDiscordWebhook(url=url)
         discord_embed = DiscordEmbed()
         for embeds in message.embeds:
@@ -60,6 +58,8 @@ class Sniff(commands.Cog):
             if embeds.fields:
                 for field in embeds.fields:
                     discord_embed.add_embed_field(name=field.name, value=field.value, inline=True)
+                if tipe == "Auction" and "ꜱᴘᴀᴡɴᴇʀ" in embeds.author.name:
+                    discord_embed.add_embed_field(name="Tag", value="<@&1483644297894035569>", inline=False)
             if embeds.footer.text:
                 discord_embed.set_footer(text=embeds.footer.text, icon_url=embeds.footer.icon_url)
         webhook.add_embed(discord_embed)
@@ -82,7 +82,7 @@ class Sniff(commands.Cog):
         if message.channel.id == int(os.getenv("AUCTION_ID")):
             if message.author.bot:
                 try:
-                    await self.send_embed(message, os.getenv("AUCTION_WEBHOOK"))
+                    await self.send_embed(message, os.getenv("AUCTION_WEBHOOK"), "Auction")
                 except Exception as e:
                     logging.error(f"Error processing message: {e}")
 
@@ -93,5 +93,6 @@ class Sniff(commands.Cog):
                         await self.send_embed(message, os.getenv("MEMBER_WEBHOOK"))
                 except Exception as e:
                     logging.error(f"Error processing message: {e}")
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(Sniff(bot))
