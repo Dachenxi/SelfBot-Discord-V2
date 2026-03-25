@@ -63,7 +63,7 @@ class Sniff(commands.Cog):
                 for field in embeds.fields:
                     discord_embed.add_embed_field(name=field.name, value=field.value, inline=True)
                 if tipe == "Auction" and "ꜱᴘᴀᴡɴᴇʀ" in embeds.author.name and "selling" in embeds.author.name:
-                    chat_webhook = AsyncDiscordWebhook(url=os.getenv("CHAT_WEBHOOK"), content="<@&1483644297894035569>")
+                    chat_webhook = AsyncDiscordWebhook(url=os.getenv("AUCTION_WEBHOOK"), content="<@&1483644297894035569> Barang langka sedang di jual di auction!!!")
             if embeds.footer.text:
                 discord_embed.set_footer(text=embeds.footer.text, icon_url=embeds.footer.icon_url)
             discord_embed.set_timestamp(datetime.datetime.now(datetime.UTC).isoformat())
