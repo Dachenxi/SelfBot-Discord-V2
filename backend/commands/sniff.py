@@ -8,7 +8,7 @@ from discord_webhook import AsyncDiscordWebhook, DiscordEmbed
 from discord.ext import commands
 
 logging.getLogger("httpx").setLevel(logging.WARNING)
-
+logger = logging.getLogger(__name__)
 
 class Sniff(commands.Cog):
     def __init__(self, bot: backend.bot.Bot):
@@ -34,7 +34,7 @@ class Sniff(commands.Cog):
         webhook = AsyncDiscordWebhook(url= os.getenv("CHAT_WEBHOOK"), rate_limit_retry=True)
         embed = DiscordEmbed()
         embed.set_author(name=nick)
-        embed.set_description(f"`Rank: {rank}` | `Team: {team}`: {message}")
+        embed.set_description(f"`Rank: {rank} | Team: {team}`: {message}")
         embed.set_footer(text=f"Chat In Game")
         embed.set_timestamp(datetime.datetime.now(datetime.UTC).isoformat())
         embed.set_color(color=discord.Color.dark_blue().value)
@@ -93,20 +93,21 @@ class Sniff(commands.Cog):
                         split_message = self.format_discord_chat(message.content)
                         await self.send_webhook(split_message["nick"], split_message["rank"], split_message["team"], split_message["message"])
                     except Exception as e:
-                        logging.error(f"Error processing message: {e}")
+                        logger.error(f"Error processing message: {e}")
+                else:
+                    await self.send_embed(message, os.getenv("CHAT_WEBHOOK"), "Chat")
             else:
                 try:
                     await self.send_chat_embed(message, os.getenv("CHAT_WEBHOOK"))
                 except Exception as e:
-                    logging.error(f"Error processing message: {e}")
+                    logger.error(f"Error processing message: {e}")
         if message.channel.id == int(os.getenv("AUCTION_ID")):
             if message.author.bot:
                 try:
                     await self.send_embed(message, os.getenv("AUCTION_WEBHOOK"), "Auction")
-                    logging.info("Sending Auction Embed")
 
                 except Exception as e:
-                    logging.error(f"Error processing message: {e}")
+                    logger.error(f"Error processing message: {e}")
 
         if message.channel.id == int(os.getenv("MEMBER_LOG")):
             if message.author.bot:
@@ -116,7 +117,7 @@ class Sniff(commands.Cog):
                     else:
                         await self.send_embed(message, os.getenv("JOIN_LEAVE_WEBHOOK"))
                 except Exception as e:
-                    logging.error(f"Error processing message: {e}")
+                    logger.error(f"Error processing message: {e}")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Sniff(bot))
