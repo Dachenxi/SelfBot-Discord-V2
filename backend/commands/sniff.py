@@ -4,6 +4,7 @@ import discord
 import re
 import logging
 import os
+import asyncio
 from discord_webhook import AsyncDiscordWebhook, DiscordEmbed
 from discord.ext import commands
 
@@ -40,6 +41,7 @@ class Sniff(commands.Cog):
         embed.set_color(color=discord.Color.dark_blue().value)
         webhook.add_embed(embed)
         await webhook.execute()
+        await asyncio.sleep(0.1)
 
     @staticmethod
     async def send_embed(message: discord.Message, url: str, tipe: str = "chat"):
@@ -69,6 +71,7 @@ class Sniff(commands.Cog):
             discord_embed.set_timestamp(datetime.datetime.now(datetime.UTC).isoformat())
         webhook.add_embed(discord_embed)
         await webhook.execute()
+        await asyncio.sleep(0.1)
         if chat_webhook:
             await chat_webhook.execute()
 
@@ -76,13 +79,14 @@ class Sniff(commands.Cog):
     async def send_chat_embed(message: discord.Message, url: str):
         webhook = AsyncDiscordWebhook(url=url)
         discord_embed = DiscordEmbed()
-        discord_embed.set_author(name=f"{message.author.name}{" | "+ message.author.display_name if message.author.display_name else ""}")
+        discord_embed.set_author(name=f"{message.author.name}{" | " + message.author.display_name if message.author.display_name else ""}")
         discord_embed.set_description(message.content)
         discord_embed.set_footer(text=f"Chat from discord")
         discord_embed.set_timestamp(datetime.datetime.now(datetime.UTC).isoformat())
         discord_embed.set_color(color=discord.Color.dark_orange().value)
         webhook.add_embed(discord_embed)
         await webhook.execute()
+        await asyncio.sleep(0.1)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
