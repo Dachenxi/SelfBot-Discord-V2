@@ -41,7 +41,6 @@ class Sniff(commands.Cog):
         embed.set_color(color=discord.Color.dark_blue().value)
         webhook.add_embed(embed)
         await webhook.execute()
-        await asyncio.sleep(0.1)
 
     @staticmethod
     async def send_embed(message: discord.Message, url: str, tipe: str = "chat"):
@@ -71,7 +70,6 @@ class Sniff(commands.Cog):
             discord_embed.set_timestamp(datetime.datetime.now(datetime.UTC).isoformat())
         webhook.add_embed(discord_embed)
         await webhook.execute()
-        await asyncio.sleep(0.1)
         if chat_webhook:
             await chat_webhook.execute()
 
@@ -86,7 +84,6 @@ class Sniff(commands.Cog):
         discord_embed.set_color(color=discord.Color.dark_orange().value)
         webhook.add_embed(discord_embed)
         await webhook.execute()
-        await asyncio.sleep(0.1)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -122,6 +119,7 @@ class Sniff(commands.Cog):
                         await self.send_embed(message, os.getenv("JOIN_LEAVE_WEBHOOK"))
                 except Exception as e:
                     logger.error(f"Error processing message: {e}")
+        await asyncio.sleep(0.2)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Sniff(bot))
