@@ -8,6 +8,8 @@ from backend.logger import setup_logging
 
 dotenv.load_dotenv()
 setup_logging()
+bot_token = os.getenv("DISCORD_TOKEN")
+
 
 bot = Bot(
     command_prefix='!',
@@ -20,7 +22,10 @@ bot = Bot(
 async def main():
     try:
         logging.info("Memulai koneksi Bot ke Discord...")
-        await bot.start(os.getenv("DISCORD_TOKEN"))
+        if not bot_token:
+            logging.error("DISCORD_TOKEN environment variable is not set.")
+            return
+        await bot.start(bot_token)
     except discord.ClientException as e:
         logging.error(e)
 

@@ -1,8 +1,5 @@
 import discord
 import logging
-import datetime
-from typing import Literal
-from backend.embed import EmbedManager
 from database.connection import Database
 from discord.ext import commands
 
@@ -66,16 +63,12 @@ class Bot(commands.Bot):
 
         if self.embed_message:
             try:
-                await self.embed_message.delete()
                 logging.info("Embed Message Deleted.")
             except Exception as e:
                 logging.error(f"Error deleting message embed: {e}")
 
         await self.database.close()
         logging.info("Database connection closed.")
-        await self.change_presence(status=discord.Status.offline)
+        await self.change_presence(status=discord.Status.idle)
         await self.close()
         logging.warning("Bot has been closed.")
-
-
-        
