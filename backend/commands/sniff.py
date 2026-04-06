@@ -3,8 +3,7 @@ import discord
 import re
 import logging
 import os
-import asyncio
-from discord import Webhook
+from discord import Embed, Message, Webhook
 from discord.ext import commands
 from typing import TYPE_CHECKING
 
@@ -26,11 +25,11 @@ class Sniff(commands.Cog):
             self.member_log_channel_id = int(os.getenv("MEMBER_LOG", 0))
         
         except ValueError:
-            logger.error("Invalid channel ID in environment variables. Please check your .env file.")
+            logger.error("Invalid channel ID di .env file. Pastikan semua channel ID adalah angka yang valid.")
 
         finally:
             if self.chat_channel_id == 0 or self.auction_channel_id == 0 or self.member_log_channel_id == 0:
-                logger.warning("One or more channel IDs are not set. Please check your .env file.")
+                logger.warning("Satu atau lebih channel ID tidak diatur dengan benar. Pastikan CHAT_ID, AUCTION_ID, dan MEMBER_LOG di .env file sudah diisi dengan benar.")
 
     def format_discord_chat(self, text):
         # Regex yang menangkap Team, Rank (opsional), Nickname, dan Pesan
@@ -53,29 +52,29 @@ class Sniff(commands.Cog):
     async def send_chat_webhook(self, nick:str, rank: str, team: str, message: str):
         webhook_url = os.getenv("CHAT_WEBHOOK")
         if not webhook_url:
-            logger.error("CHAT_WEBHOOK environment variable is not set.")
+            logger.error("CHAT_WEBHOOK Environment belum diatur.")
             return
         
         webhook_conn = Webhook.from_url(url=webhook_url, client=self.bot)
         embed = discord.Embed(
-            description=f"`Rank: {rank} | Team: {team}`: {message}",
+            description=f"{message}",
             timestamp=datetime.datetime.now(datetime.UTC),
-            color=discord.Color.dark_blue()
+            color=discord.Color.brand_green()
         )
+        embed.set_author(
+            name=f"{nick} | {rank} [{team}]",
+            icon_url=f"https://mc-heads.net/avatar/{nick}"
+            )
         embed.set_footer(text="Chat In Game")
-
-        mc_avatar_url = f"https://mc-heads.net/avatar/{nick}"
 
         await webhook_conn.send(
             embed=embed,
-            username=nick,
-            avatar_url=mc_avatar_url
         )
 
     async def send_auction_embed(self, message: discord.Message):
         webhook_url = os.getenv("AUCTION_WEBHOOK")
         if not webhook_url:
-            logger.error("AUCTION_WEBHOOK environment variable is not set.")
+            logger.error("AUCTION_WEBHOOK Environment belum diatur.")
             return
         webhook_conn = Webhook.from_url(url=webhook_url, client=self.bot)
         
@@ -88,9 +87,6 @@ class Sniff(commands.Cog):
             embed.timestamp = datetime.datetime.now(datetime.UTC)
         
             author_name = source_embed.author.name or ""
-            if "ꜱᴘᴀᴡɴᴇʀ" in author_name and "selling" in author_name:
-                auction_webhook = Webhook.from_url(webhook_url, client=self.bot)
-                await auction_webhook.send(content="<@&1483644297894035569> Barang langka sedang di jual di auction!!!")
             
             await webhook_conn.send(
                 embed=embed,
@@ -107,13 +103,9 @@ class Sniff(commands.Cog):
         for source_embed in message.embeds:
             embed = source_embed.copy()
             embed.timestamp = datetime.datetime.now(datetime.UTC)
-            nick = embed.author.name.split(" ")[0] if embed.author and embed.author.name else "MarlinMC"
-
-
+            
             await webhook_conn.send(
-                embed=embed,
-                username=nick,
-                avatar_url=f"https://mc-heads.net/avatar/{nick}"
+                embed=embed
             )
 
     async def send_discord_chat(self, message: discord.Message):
@@ -128,61 +120,88 @@ class Sniff(commands.Cog):
             return
         
         webhook_conn = Webhook.from_url(url=webhook_url, client=self.bot)
-        
+        embed = Embed(
+            description=message.content,
+            timestamp=datetime.datetime.now(datetime.UTC),
+            color=discord.Color.brand_red()
+        )
+        embed.set_author(
+            name=f"{message.author.name}#{message.author.discriminator}",
+            icon_url=message.author.avatar.url if message.author.avatar else None
+        )
+
+
         await webhook_conn.send(
-            content=message.content,
-            username=f"{message.author.name}{(' | ' + message.author.display_name) if message.author.display_name else ''}",
-            avatar_url=message.author.avatar.url if message.author.avatar else None
+            embed=embed
         )
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.channel.id == self.chat_channel_id:
-            if message.author.bot:
-                if message.content:
-                    try:
-                        split_message = self.format_discord_chat(message.content)
-                        if not split_message:
-                            logger.warning(f"Failed to parse message: {message.content}")
-                            return
-                        await self.send_chat_webhook(split_message["nick"], split_message["rank"], split_message["team"], split_message["message"])
-                    except Exception as e:
-                        logger.error(f"Error processing message: {e}")
-                else:
-                    await self.send_event_embed(message, os.getenv("CHAT_WEBHOOK", ""))
+            await self._handle_chat_channel(message)
+        elif message.channel.id == self.auction_channel_id:
+            await self._handle_auction_channel(message)
+        elif message.channel.id == self.member_log_channel_id:
+            await self._handle_member_log_channel(message)
+
+    async def _handle_chat_channel(self, message:Message):
+        """Handle untuk chat channel
+
+        Args:
+            message (Message): message dari discord client
+        """
+        if message.author.bot:
+            if not message.content:
+                await self.send_event_embed(message, os.getenv("CHAT_WEBHOOK", ""))
+                return
+
+            split_message = self.format_discord_chat(message.content)
+            if not split_message:
+                logger.warning(f"Gagal memparse pesan: {message.content}")
+                return
+
+            await self.send_chat_webhook(
+                split_message["nick"],
+                split_message["rank"],
+                split_message["team"],
+                split_message["message"],
+            )
+            return
+        else:
+            await self.send_discord_chat(message)
+    
+    async def _handle_auction_channel(self, message:Message):
+        """Handle untuk auction channel
+
+        Args:
+            message (Message): message dari discord client
+        """
+        if message.author.bot:
+            await self.send_auction_embed(message)
+            return
+    
+    async def _handle_member_log_channel(self, message:Message):
+        """Handle untuk member log channel
+
+        Args:
+            message (Message): message dari discord client
+        """
+        if message.author.bot:
+            author_name = message.embeds[0].author.name if message.embeds and message.embeds[0].author else ""
+
+            if author_name and "first time" in author_name:
+                member_webhook_url = os.getenv("MEMBER_WEBHOOK")
+                if not member_webhook_url:
+                    logger.error("MEMBER_WEBHOOK environment variable is not set.")
+                    return
+                await self.send_event_embed(message, member_webhook_url)
             else:
-                try:
-                    await self.send_discord_chat(message)
-                except Exception as e:
-                    logger.error(f"Error processing message: {e}")
-        if message.channel.id == self.auction_channel_id:
-            if message.author.bot:
-                try:
-                    await self.send_auction_embed(message)
-
-                except Exception as e:
-                    logger.error(f"Error processing message: {e}")
-
-        if message.channel.id == self.member_log_channel_id:
-            if message.author.bot:
-                try:
-                    author_name = message.embeds[0].author.name if message.embeds and message.embeds[0].author else ""
-
-                    if author_name and "first time" in author_name:
-                        member_webhook_url = os.getenv("MEMBER_WEBHOOK")
-                        if not member_webhook_url:
-                            logger.error("MEMBER_WEBHOOK environment variable is not set.")
-                            return
-                        await self.send_event_embed(message, member_webhook_url)
-                    else:
-                        join_leave_webhook_url = os.getenv("JOIN_LEAVE_WEBHOOK")
-                        if not join_leave_webhook_url:
-                            logger.error("JOIN_LEAVE_WEBHOOK environment variable is not set.")
-                            return
-                        await self.send_event_embed(message, join_leave_webhook_url)
-                except Exception as e:
-                    logger.error(f"Error processing message: {e}")
-        await asyncio.sleep(0.2)
+                join_leave_webhook_url = os.getenv("JOIN_LEAVE_WEBHOOK")
+                if not join_leave_webhook_url:
+                    logger.error("JOIN_LEAVE_WEBHOOK environment variable is not set.")
+                    return
+                await self.send_event_embed(message, join_leave_webhook_url)
+            return
 
 async def setup(bot: "Bot"):
     await bot.add_cog(Sniff(bot))
