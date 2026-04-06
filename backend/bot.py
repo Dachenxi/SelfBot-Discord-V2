@@ -14,6 +14,7 @@ class Bot(commands.Bot):
 
     async def parse_msg(self, message: discord.Message):
         if (
+            self.user and
             message.author.id == self.user.id and
             message.content.startswith(self.command_prefix)
             ):
