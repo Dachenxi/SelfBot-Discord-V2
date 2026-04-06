@@ -1,11 +1,13 @@
 import logging
-import backend
 import random
 from discord.ext import commands
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from backend.bot import Bot
 
 class Utility(commands.Cog):
-    def __init__(self, bot: backend.bot.Bot):
+    def __init__(self, bot: "Bot"):
         self.bot = bot
 
     @commands.command(name="reload cog", aliases=["reload"])
@@ -21,5 +23,5 @@ class Utility(commands.Cog):
         except Exception as e:
             await ctx.send(f"Error {e}")
 
-async def setup(bot: commands.Bot):
+async def setup(bot: "Bot"):
     await bot.add_cog(Utility(bot))
