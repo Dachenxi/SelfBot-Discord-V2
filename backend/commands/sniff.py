@@ -79,19 +79,20 @@ class Sniff(commands.Cog):
         webhook_conn = Webhook.from_url(url=webhook_url, client=self.bot)
         
         author_name = message.embeds[0].author.name if message.embeds and message.embeds[0].author else ""
-        if author_name:
-            nick = author_name.split(" ")[0]
-
         for source_embed in message.embeds:
             embed = source_embed.copy()
             embed.timestamp = datetime.datetime.now(datetime.UTC)
         
             author_name = source_embed.author.name or ""
             
-            await webhook_conn.send(
-                embed=embed,
-                username=nick if nick else "Auction Bot",
-                avatar_url=f"https://mc-heads.net/avatar/{nick}" if nick else None
+            if "ꜱᴘᴀᴡɴᴇʀ" in author_name.lower():
+                return await webhook_conn.send(
+                    content="**[SPAWNER]** <@&1483644297894035569> Spawner neh dijual",
+                    embed=embed
+                    )
+
+            return await webhook_conn.send(
+                embed=embed
             )
     
     async def send_event_embed(self, message: discord.Message, webhook_url: str):
