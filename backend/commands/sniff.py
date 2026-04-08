@@ -85,7 +85,7 @@ class Sniff(commands.Cog):
         
             author_name = source_embed.author.name or ""
             
-            if "ꜱᴘᴀᴡɴᴇʀ" in author_name.lower():
+            if "ꜱᴘᴀᴡɴᴇʀ" in author_name.lower() and "selling" in author_name.lower():
                 return await webhook_conn.send(
                     content="**[SPAWNER]** <@&1483644297894035569> Spawner neh dijual",
                     embed=embed
