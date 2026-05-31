@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class Sniff(commands.Cog):
     def __init__(self, bot: "Bot"):
         self.bot = bot
-        self.user_chat_pattern = r"\[(.*?)\]\s+(?:\**(\w+)\**\s+)?([^\s»]+)\s*»\s*(.*)"
+        self.user_chat_pattern = r"^\[([^\]]*)\]\s+(\S+)\s+(.+)$"
 
         try:
             self.chat_channel_id = int(os.getenv("CHAT_ID", 0))
@@ -37,15 +37,13 @@ class Sniff(commands.Cog):
         # Mencari semua kecocokan
         matches = re.findall(self.user_chat_pattern, text)
 
-        for team, rank, nick, message in matches:
-            safe_message = message.replace("@everyone", "everyone").replace("@here", "here")
+        for team, rank, nick in matches:
             display_team = f"{team}" if team else "None"
             display_rank = rank if rank else "Explorer"
             return {
                 "team": display_team,
                 "rank": display_rank,
                 "nick": nick.replace('\\', ''),
-                "message": safe_message
             }
         return None
 
@@ -62,13 +60,13 @@ class Sniff(commands.Cog):
             color=discord.Color.brand_green()
         )
         embed.set_author(
-            name=f"{nick} | {rank} [{team}]",
-            icon_url=f"https://mc-heads.net/avatar/{nick}"
-            )
-        embed.set_footer(text="Chat In Game")
+            name="Chat in Game"
+        )
 
         await webhook_conn.send(
             embed=embed,
+            username=f"{nick} | {rank} [{team}]",
+            avatar_url=f"https://mc-heads.net/avatar/{nick}"
         )
 
     async def send_auction_embed(self, message: discord.Message):
@@ -127,13 +125,14 @@ class Sniff(commands.Cog):
             color=discord.Color.brand_red()
         )
         embed.set_author(
-            name=f"{message.author.name}#{message.author.discriminator}",
-            icon_url=message.author.avatar.url if message.author.avatar else None
+            name="Chat in Discord"
         )
 
 
         await webhook_conn.send(
-            embed=embed
+            embed=embed,
+            username=message.author.name,
+            avatar_url=message.author.avatar.url if message.author.avatar else None
         )
 
     @commands.Cog.listener()
@@ -156,7 +155,8 @@ class Sniff(commands.Cog):
                 await self.send_event_embed(message, os.getenv("CHAT_WEBHOOK", ""))
                 return
 
-            split_message = self.format_discord_chat(message.content)
+            split_message = self.format_discord_chat(message.author.name)
+            message_content = message.content
             if not split_message:
                 logger.warning(f"Gagal memparse pesan: {message.content}")
                 return
@@ -165,7 +165,7 @@ class Sniff(commands.Cog):
                 split_message["nick"],
                 split_message["rank"],
                 split_message["team"],
-                split_message["message"],
+                message_content,
             )
             return
         else:
