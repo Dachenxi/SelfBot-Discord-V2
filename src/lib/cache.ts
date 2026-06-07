@@ -1,1 +1,0 @@
-export const snifferCache = new Map<string, string>();

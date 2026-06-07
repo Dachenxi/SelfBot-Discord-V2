@@ -52,3 +52,9 @@ export interface ListSnifferConfigResponse {
 	message: string;
 	data: SnifferConfigResponse[];
 }
+
+export interface AuthResponse {
+	success: true;
+	message: string;
+	token: string;
+}
