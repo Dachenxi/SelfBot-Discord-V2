@@ -1,6 +1,5 @@
 <script lang="ts">
-    import './layout.css';
-    import favicon from '$lib/assets/favicon.svg';
+    import '../layout.css';
     import { page } from '$app/state';
     import Pill from '$lib/components/Pill.svelte';
     import ToastContainer from '$lib/components/ToastContainer.svelte';
@@ -11,10 +10,11 @@
     
     let botName: string = $state('Bot');
     let botStatus: string = $state('Offline');
+    
 </script>
 
 <svelte:head>
-    <link rel="icon" href={data.clientInfo?.avatar || favicon} />
+    <link rel="icon" href={data.clientInfo?.avatar} />
     <title>Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 </svelte:head>
@@ -107,6 +107,9 @@
                 {:else if page.url.pathname.startsWith('/profile')}
                     <span>Profile</span>
                     <p class="text-sm text-woodsmoke-500">Lihat informasi akun kamu</p>
+                {:else if page.url.pathname.startsWith('/login')}
+                    <span>Login</span>
+                    <p class="text-sm text-woodsmoke-500">Masuk untuk mengakses dashboard</p>
                 {/if}
             </h1>
         </div>

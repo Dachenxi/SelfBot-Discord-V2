@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { invalidate, invalidateAll } from "$app/navigation";
     import Button from "$lib/components/Button.svelte";
+    import { enhance } from "$app/forms";
     import { toastState } from "$lib/state/Toast.svelte";
     import { slide } from 'svelte/transition';
     import { flip } from 'svelte/animate';
     
-    let { data } = $props()
+    let { data } = $props();
 
     let isModalAddOpen = $state(false);
     let isSubmitAdd = $state(false);
@@ -22,47 +22,17 @@
         isModalAddOpen = false;
         formChannelId = "";
         formWebhookUrl = "";
-    }
-
-    async function saveConfig(e: Event) {
-        e.preventDefault();
-
-        if (!formChannelId || !formWebhookUrl) { return }
-
-        isSubmitAdd = true;
-        try {
-            const response = await fetch("http://localhost:3000/api/sniffer/config/save", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    channelId: formChannelId,
-                    webhookUrl: formWebhookUrl
-                })
-            })
-
-            const result = await response.json();
-
-            if(response.ok) {
-                toastState.add("Berhasil menambahkan Sniffer!", "success");
-                closeModalAdd()
-                invalidateAll();
-            }
-        } catch (error) {
-            toastState.add("Gagal menambahkan Sniffer!", "error");
-        } finally {
-            isSubmitAdd = false;
-        }
+        isSubmitAdd = false; // Pastikan loading mati saat ditutup
     }
 
     let searchQuery = $state("");
 
+    // Tambahkan || [] di akhir agar jika data kosong, filter tidak error
     let filteredSniffers = $derived(
-        data.snifferList?.filter(sniffer => 
+        data.snifferList?.filter((sniffer: any) => 
             sniffer.channelId.includes(searchQuery) || 
             sniffer.channelName.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+        ) || []
     );
 </script>
 
@@ -124,8 +94,9 @@
             {/each}
         </div>
         
+    </div>
 </div>
-</div>
+
 {#if isModalAddOpen}
     <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black/60 backdrop-blur-sm transition-opacity">
         
@@ -142,13 +113,29 @@
                     </button>
                 </div>
 
-                <form onsubmit={saveConfig} class="p-6 flex flex-col gap-5">
+                <form method="POST" action="?/addSniffer" class="p-6 flex flex-col gap-5" 
+                use:enhance={() => {
+                    isSubmitAdd = true; // 1. Nyalakan loading spinner saat form disubmit
+                    
+                    return async ({ result, update }) => {
+                        isSubmitAdd = false; // 2. Matikan loading spinner setelah server membalas
+                        
+                        if (result.type === 'success') {
+                            toastState.add("Menambahkan sniffer...", "success");
+                            closeModalAdd(); // 3. Tutup modal secara otomatis
+                            update();        // 4. Panggil ulang data dari server untuk update tabel
+                        } else if (result.type === 'failure') {
+                            toastState.add("Gagal menambahkan sniffer.", "error");
+                        }
+                    }   
+                }}>
                     
                     <div>
                         <label for="channelId" class="block mb-2 text-sm font-medium text-woodsmoke-300">Channel ID Discord</label>
                         <input 
                             type="text" 
                             id="channelId"
+                            name="channelId"
                             bind:value={formChannelId}
                             autocomplete="off"
                             required
@@ -164,6 +151,7 @@
                             <input 
                                 id="webhookUrl"
                                 required
+                                name="webhookUrl"
                                 bind:value={formWebhookUrl}
                                 placeholder="https://discord.com/api/webhooks/..." 
                                 
