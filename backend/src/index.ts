@@ -9,6 +9,11 @@ const runOnlyBot = args.includes('--only-bot');
 
 async function main() {
     try {
+        if (!runOnlyBot) {
+            console.log("Starting WebServer");
+            await startWebServer();
+            console.log("WebServer is running.");
+        }
         if (!runOnlyWeb) {
             console.log("Starting SelfBot...");
             await client.login(process.env.DISCORD_TOKEN);
@@ -29,11 +34,6 @@ async function main() {
         console.log("Caches loaded.");
         //#endregion
 
-        if (!runOnlyBot) {
-            console.log("Starting WebServer");
-            await startWebServer();
-            console.log("WebServer is running.");
-        }
     } catch (error) {
         console.error('❌ Terjadi kesalahan fatal saat startup aplikasi:', error);
         await client.destroy();

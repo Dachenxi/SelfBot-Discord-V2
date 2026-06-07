@@ -2,7 +2,7 @@ import { fail } from '@sveltejs/kit'; // Wajib import fail
 import { getApiUrl } from '$lib/api';
 import type { ListSnifferConfigResponse, SaveSnifferConfigResponse } from '../../../../../shared/types';
 
-export const load = async ({ fetch, cookies, parent }) => {
+export const load = async ({ fetch, cookies, parent, setHeaders }) => {
     await parent(); 
     const token = cookies.get('TOKEN');
 
@@ -18,6 +18,10 @@ export const load = async ({ fetch, cookies, parent }) => {
 
         const result = await response.json() as ListSnifferConfigResponse;
         
+        setHeaders({
+            'Cache-Control': `max-age=${60 * 60 * 24}, stale-while-revalidate=${60 * 60 * 24 * 7}` // Cache selama 1 hari, dengan opsi stale-while-revalidate selama 7 hari
+        })
+
         return { snifferList: result.data || [] }; 
     } catch (error) {
         return { snifferList: [] };

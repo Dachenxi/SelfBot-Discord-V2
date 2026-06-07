@@ -4,7 +4,10 @@ import { env } from "$env/dynamic/public";
 export const AUTH_TOKEN_KEY = 'TOKEN';
 
 export function getApiUrl(endpoint: string) {
-    const baseUrl = env.PUBLIC_API_URL || (!browser ? 'http://localhost:3000' : 'http://backend:3000')
+    const internalDockerUrl = 'http://backend:3000';
+    const publicUrl = env.PUBLIC_API_URL || 'http://localhost:3000';
+
+    const baseUrl = !browser ? internalDockerUrl : publicUrl;
     
     if (endpoint.startsWith('/')) {
         return `${baseUrl}${endpoint}`;
