@@ -1,10 +1,10 @@
 import { browser } from '$app/environment';
-import { PUBLIC_API_URL } from '$env/static/public';
+import { env } from "$env/dynamic/public";
 
 export const AUTH_TOKEN_KEY = 'TOKEN';
 
 export function getApiUrl(endpoint: string) {
-    const baseUrl = PUBLIC_API_URL || (!browser ? 'http://localhost:3000' : 'http://backend:3000')
+    const baseUrl = env.PUBLIC_API_URL || (!browser ? 'http://localhost:3000' : 'http://backend:3000')
     
     if (endpoint.startsWith('/')) {
         return `${baseUrl}${endpoint}`;
